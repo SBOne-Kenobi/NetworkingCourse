@@ -1,8 +1,9 @@
-import java.io.*
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
+import java.io.PrintWriter
 import java.net.ServerSocket
 import java.net.Socket
-
-data class HttpRequest(val method: String, val headers: Map<String, String>, val body: String)
 
 fun buildResponse(code: Int, message: String, body: String? = null) =
     if (body == null)
@@ -16,10 +17,8 @@ Content-Length: ${body.length}
 
 $body""".trimIndent()
 
-fun parseRequest(input: BufferedReader): HttpRequest? {
-    val startLine = input.readLine()
-    val method = startLine.split(" ").getOrNull(0)
-        ?: return null
+fun parseRequest(input: BufferedReader): String? {
+    input.readLine()
     val headers = hashMapOf<String, String>()
     var length = 0
     while (true) {
@@ -39,11 +38,11 @@ fun parseRequest(input: BufferedReader): HttpRequest? {
     }
     val body = CharArray(length)
     input.read(body)
-    return HttpRequest(method, headers, String(body))
+    return String(body)
 }
 
-fun formResponseBody(request: HttpRequest): String? {
-    val file = File(request.body)
+fun formResponseBody(path: String): String? {
+    val file = File(path)
     return if (file.exists())
         file.readText()
     else
