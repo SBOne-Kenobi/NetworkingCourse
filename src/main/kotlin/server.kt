@@ -5,6 +5,7 @@ import java.io.PrintWriter
 import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 
 fun buildResponse(code: Int, message: String, body: String? = null) =
@@ -69,29 +70,52 @@ fun serverRoutine(clientSocket: Socket) {
     clientSocket.close()
 }
 
+class MyThreadPool(maxThreadsCount: Int) {
+
+    private val lock = ReentrantLock()
+    private val hasTask = lock.newCondition()
+    private val tasks: MutableList<Runnable> = mutableListOf()
+
+    init {
+        repeat(maxThreadsCount) {
+            thread {
+                workerRoutine()
+            }
+        }
+    }
+
+    private fun workerRoutine() {
+        while (true) {
+            val task = lock.withLock {
+                while (tasks.isEmpty()) {
+                    hasTask.await()
+                }
+                tasks.removeLast()
+            }
+            task.run()
+        }
+    }
+
+    fun submit(task: Runnable) {
+        lock.withLock {
+            tasks.add(task)
+            hasTask.signal()
+        }
+    }
+}
+
 fun server(maxThreadsCount: Int) {
     val serverPort = 8080
     val serverSocket = ServerSocket(serverPort, maxThreadsCount)
-    var runningThreads = 0
-    val lock = ReentrantLock()
-    val condition = lock.newCondition()
+    val threadPool = MyThreadPool(maxThreadsCount)
     while (true) {
         val clientSocket = serverSocket.accept()
-        lock.withLock {
-            while (runningThreads >= maxThreadsCount) {
-                condition.await()
-            }
-        }
-        Thread {
-            lock.withLock {
-                ++runningThreads
-            }
+        threadPool.submit {
+            println("Start ${Thread.currentThread().id}")
+            Thread.sleep(5000)
             serverRoutine(clientSocket)
-            lock.withLock {
-                --runningThreads
-                condition.signal()
-            }
-        }.start()
+            println("End ${Thread.currentThread().id}")
+        }
     }
 }
 
