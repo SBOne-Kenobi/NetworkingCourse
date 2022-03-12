@@ -4,6 +4,8 @@ import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.net.ServerSocket
 import java.net.Socket
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 fun buildResponse(code: Int, message: String, body: String? = null) =
     if (body == null)
@@ -67,17 +69,32 @@ fun serverRoutine(clientSocket: Socket) {
     clientSocket.close()
 }
 
-fun server() {
+fun server(maxThreadsCount: Int) {
     val serverPort = 8080
-    val serverSocket = ServerSocket(serverPort)
+    val serverSocket = ServerSocket(serverPort, maxThreadsCount)
+    var runningThreads = 0
+    val lock = ReentrantLock()
+    val condition = lock.newCondition()
     while (true) {
         val clientSocket = serverSocket.accept()
+        lock.withLock {
+            while (runningThreads >= maxThreadsCount) {
+                condition.await()
+            }
+        }
         Thread {
+            lock.withLock {
+                ++runningThreads
+            }
             serverRoutine(clientSocket)
+            lock.withLock {
+                --runningThreads
+                condition.signal()
+            }
         }.start()
     }
 }
 
-fun main() {
-    server()
+fun main(args: Array<String>) {
+    server(args[0].toInt())
 }
