@@ -1,5 +1,6 @@
 import java.io.*
 import java.net.ServerSocket
+import java.net.Socket
 
 data class HttpRequest(val method: String, val headers: Map<String, String>, val body: String)
 
@@ -49,26 +50,32 @@ fun formResponseBody(request: HttpRequest): String? {
         null
 }
 
+fun serverRoutine(clientSocket: Socket) {
+    val output = PrintWriter(clientSocket.getOutputStream(), true)
+    val input = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
+
+    val request = parseRequest(input)
+
+    val response = if (request == null) {
+        buildResponse(400, "Bad request", "")
+    } else {
+        formResponseBody(request)?.let {
+            buildResponse(200, "OK", it)
+        } ?: buildResponse(404, "Not found")
+    }
+    output.println(response)
+
+    clientSocket.close()
+}
+
 fun server() {
     val serverPort = 8080
     val serverSocket = ServerSocket(serverPort)
     while (true) {
         val clientSocket = serverSocket.accept()
-        val output = PrintWriter(clientSocket.getOutputStream(), true)
-        val input = BufferedReader(InputStreamReader(clientSocket.getInputStream()))
-
-        val request = parseRequest(input)
-
-        val response = if (request == null) {
-            buildResponse(400, "Bad request", "")
-        } else {
-            formResponseBody(request)?.let {
-                buildResponse(200, "OK", it)
-            } ?: buildResponse(404, "Not found")
-        }
-        output.println(response)
-
-        clientSocket.close()
+        Thread {
+            serverRoutine(clientSocket)
+        }.start()
     }
 }
 
