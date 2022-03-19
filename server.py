@@ -1,18 +1,19 @@
 import argparse
 import socket
+import sys
 from datetime import datetime
 import json
 from urllib.parse import urlparse
-
 from http_parser.http import *
 
-import requests
 
 CONFIG_FILE = 'config.json'
 
 crlf = '\r\n'
 OK_HEADER = 'HTTP/1.1 200 OK'
 CONTENT_TYPE_TEXT = 'Content-Type: text/html'
+HOST_TEMP = 'Host: {}'
+CONTENT_LENGTH_TEMP = 'Content-Length: {}'
 
 NOT_FOUND_HEADER = 'HTTP/1.1 404 Not Found'
 NOT_FOUND_HTML = '<HTML><HEAD><TITLE>Not Found</TITLE></HEAD> <BODY>Not Found</BODY></HTML>'
@@ -26,8 +27,18 @@ BAD_REQUEST_HEADER = 'HTTP/1.1 400 Bad Request'
 BAD_REQUEST_HTML = '<HTML><HEAD><TITLE>Bad Request</TITLE></HEAD> <BODY>Bad Request</BODY></HTML>'
 BAD_REQUEST = BAD_REQUEST_HEADER + crlf + CONTENT_TYPE_TEXT + crlf + crlf + BAD_REQUEST_HTML
 
+GET_HEADER_TEMP = 'GET {} HTTP/1.1'
+GET_TEMP = GET_HEADER_TEMP + crlf + HOST_TEMP + crlf + crlf
+
+POST_HEADER_TEMP = 'POST {} HTTP/1.1'
+POST_TEMP = POST_HEADER_TEMP + crlf + \
+            HOST_TEMP + crlf + \
+            CONTENT_TYPE_TEXT + crlf + \
+            CONTENT_LENGTH_TEMP + crlf + crlf + '{}'
+
 TAG_RESPONSE_GET = 'RESPONSE_GET'
 TAG_RESPONSE_POST = 'RESPONSE_POST'
+
 
 class Logger:
     def __init__(self, file):
@@ -48,6 +59,23 @@ logger = Logger('proxy.log')
 black_list = set()
 
 
+def parse_http(conn):
+    res = HttpParser()
+    body = []
+    while True:
+        data = conn.recv(1024)
+        if not data:
+            break
+        recved = len(data)
+        nparsed = res.execute(data, recved)
+        assert nparsed == recved
+        if res.is_partial_body():
+            body.append(res.recv_body().decode('utf-8'))
+        if res.is_message_complete():
+            break
+    return res, ''.join(body)
+
+
 def get_host(url):
     host = urlparse(url).hostname
     if 'www' in host:
@@ -62,23 +90,47 @@ def load_config():
     black_list = set(config['black_list'])
 
 
+def init_client(host):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((host, 80))
+    return s
+
+
 def process_get(url):
-    resp = requests.get(url)
-    logger.log(TAG_RESPONSE_GET, f'{url} {resp.status_code}')
-    if resp.status_code == 404:
+    url_text = url
+    url = urlparse(url)
+    s = init_client(url.hostname)
+    s.sendall(GET_TEMP.format(
+        url.path if len(url.path) > 0 else "/",
+        url.hostname
+    ).encode())
+    resp, body = parse_http(s)
+    s.close()
+    logger.log(TAG_RESPONSE_GET, f'{url_text} {resp.get_status_code()}')
+    if resp.get_status_code() == 404:
         resp = NOT_FOUND
     else:
-        resp = OK_HEADER + crlf + crlf + resp.content.decode(resp.encoding)
+        resp = OK_HEADER + crlf + crlf + body
     return resp
 
 
 def process_post(url, body):
-    resp = requests.post(url, body)
-    logger.log(TAG_RESPONSE_POST, f'{url} {resp.status_code}')
-    if resp.status_code == 404:
+    url_text = url
+    url = urlparse(url)
+    s = init_client(url.hostname)
+    s.sendall(POST_TEMP.format(
+        url.path if len(url.path) > 0 else "/",
+        url.hostname,
+        len(body),
+        body
+    ).encode())
+    resp, body = parse_http(s)
+    s.close()
+    logger.log(TAG_RESPONSE_POST, f'{url_text} {resp.get_status_code()}')
+    if resp.get_status_code() == 404:
         resp = NOT_FOUND
     else:
-        resp = OK_HEADER + crlf + crlf + resp.content.decode(resp.encoding)
+        resp = OK_HEADER + crlf + crlf + body
     return resp
 
 
@@ -86,6 +138,7 @@ def process_request(request: HttpParser, body):
     method = request.get_method().lower()
     url = 'http://' + request.get_path()[1:]
     host = get_host(url)
+    print(host)
     if host in black_list:
         resp = BANNED_TEMP.format(host)
     elif method == 'get':
@@ -97,29 +150,16 @@ def process_request(request: HttpParser, body):
     return resp
 
 
-def parse_request(conn):
-    request = HttpParser()
-    body = []
-    while True:
-        data = conn.recv(1024)
-        if not data:
-            break
-        recved = len(data)
-        nparsed = request.execute(data, recved)
-        assert nparsed == recved
-        if request.is_partial_body():
-            body.append(request.recv_body().decode('utf-8'))
-        if request.is_message_complete():
-            break
-    return request, ''.join(body)
-
-
 def process_client(conn):
-    request, body = parse_request(conn)
-    resp = process_request(request, body)
-    conn.send(resp.encode())
-    conn.close()
-
+    try:
+        request, body = parse_http(conn)
+        resp = process_request(request, body)
+        conn.send(resp.encode())
+    except Exception as e:
+        sys.stderr.write(f'{e}\n')
+        sys.stderr.flush()
+    finally:
+        conn.close()
 
 def init_server(port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
