@@ -19,12 +19,31 @@ sealed class Command(val name: String, private val description: String, val func
             Help.register()
             Dir.register()
             List.register()
+            CD.register()
+            MkDir.register()
+            RmDir.register()
+            RmFile.register()
             Load.register()
             Dump.register()
             Quit.register()
         }
     }
 
+    object MkDir: Command("mkdir [name]", "create directory", { directory ->
+        mkDir(directory)
+    })
+
+    object RmFile: Command("rmf [fileName]", "deletes file", { fileName ->
+        rmFile(fileName)
+    })
+
+    object RmDir: Command("rmd [directory]", "deletes directory", { directory ->
+        rmDir(directory)
+    })
+
+    object CD: Command("cd [directory]", "changes root", { directory ->
+        goTo(directory)
+    })
 
     object Load : Command("load [filename]", "loads file from server", { fileName ->
         val file = File(fileName)

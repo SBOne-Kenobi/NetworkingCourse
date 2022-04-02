@@ -144,6 +144,22 @@ class FTPClient(
         result.join()
     }
 
+    fun goTo(folder: String) {
+        send("CWD $folder", checkCode(250))
+    }
+
+    fun mkDir(folder: String) {
+        send("MKD $folder", checkCode(257))
+    }
+
+    fun rmDir(folder: String) {
+        send("RMD $folder", checkCode(250))
+    }
+
+    fun rmFile(fileName: String) {
+        send("DELE $fileName", checkCode(250))
+    }
+
     fun quit() {
         send("QUIT", checkCode(200))
     }
