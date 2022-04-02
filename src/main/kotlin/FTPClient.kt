@@ -115,7 +115,12 @@ class FTPClient(
         }
         send("LIST", checkCode(150))
         response(checkCode(226))
-        result.await().trim().lines().map { FileHierarchy.parse(it) }
+        result.await().trim().let {
+            if (it.isBlank())
+                emptyList()
+            else
+                it.lines().map { FileHierarchy.parse(it) }
+        }
     }
 
     fun sendFile(path: Path) = runBlocking {
