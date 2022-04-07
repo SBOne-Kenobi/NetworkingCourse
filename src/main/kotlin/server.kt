@@ -2,7 +2,7 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import kotlin.random.Random
 
-fun isLoss(lossProb: Double, random: Random): Boolean {
+private fun isLoss(lossProb: Double, random: Random): Boolean {
     return random.nextDouble() < lossProb
 }
 

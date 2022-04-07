@@ -7,7 +7,7 @@ import java.util.Date
 import kotlin.math.max
 import kotlin.math.min
 
-fun Double.format(digits: Int) =
+private fun Double.format(digits: Int) =
     "%.${digits}f".format(this).replace(',', '.')
 
 class Statistics {
