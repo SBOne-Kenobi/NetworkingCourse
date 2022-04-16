@@ -36,7 +36,7 @@ class StopWaitReceiver(
                     break
                 }
             } catch (e: IOException) {
-                System.err.println(e)
+                System.err.println(e.message)
                 continue
             }
         }

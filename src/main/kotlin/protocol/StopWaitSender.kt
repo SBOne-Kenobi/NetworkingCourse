@@ -38,7 +38,7 @@ class StopWaitSender(
                     try {
                         ack = receiveDatagramPacket.data.toFrame(receiveDatagramPacket.length)
                     } catch (e: IOException) {
-                        System.err.println(e)
+                        System.err.println(e.message)
                     }
                     if (ack != null && !ack.isAck && receiveDatagramPacket.socketAddress == address) {
                         return@withContext true
