@@ -1,7 +1,7 @@
 import java.net.InetAddress
 import java.net.Socket
 
-fun getAvailablePorts(
+private fun getAvailablePorts(
     address: InetAddress,
     from: Int,
     to: Int

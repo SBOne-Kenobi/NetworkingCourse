@@ -2,7 +2,7 @@ import java.net.InterfaceAddress
 import java.net.NetworkInterface
 import kotlin.streams.toList
 
-fun getInterfaceAddress(): InterfaceAddress {
+private fun getInterfaceAddress(): InterfaceAddress {
     return NetworkInterface
         .networkInterfaces()
         .toList()
@@ -17,10 +17,10 @@ fun getInterfaceAddress(): InterfaceAddress {
         }
 }
 
-val InterfaceAddress.ip: String
+private val InterfaceAddress.ip: String
     get() = address.hostAddress
 
-val InterfaceAddress.subnetwork: String
+private val InterfaceAddress.subnetwork: String
     get() = (0..3).map { i ->
         (8 - (networkPrefixLength - i * 8).coerceIn(0, 8)).let {
             UByte.MAX_VALUE.toInt().shr(it).shl(it)
