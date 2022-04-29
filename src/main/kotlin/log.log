@@ -1,0 +1,167 @@
+Sender: frame 0 sent
+Sender: [ 0| 1 2 3 ] 4 5 6
+Receiver: | 0 1 2 3 4 5 6
+----------------
+Sender: frame 1 sent
+Sender: [ 0 1| 2 3 ] 4 5 6
+Receiver: | 0 1 2 3 4 5 6
+----------------
+Sender: frame 2 sent
+Sender: [ 0 1 2| 3 ] 4 5 6
+Receiver: | 0 1 2 3 4 5 6
+----------------
+Sender: frame 3 sent
+Sender: [ 0 1 2 3| ] 4 5 6
+Receiver: | 0 1 2 3 4 5 6
+----------------
+Receiver: received 1
+Drop frame
+Sender: [ 0 1 2 3| ] 4 5 6
+Receiver: | 0 1 2 3 4 5 6
+----------------
+Receiver: received 2
+Drop frame
+Sender: [ 0 1 2 3| ] 4 5 6
+Receiver: | 0 1 2 3 4 5 6
+----------------
+Receiver: received 0
+Send ack 0
+Sender: [ 0 1 2 3| ] 4 5 6
+Receiver: 0| 1 2 3 4 5 6
+----------------
+Receiver: received 2
+Drop frame
+Sender: [ 0 1 2 3| ] 4 5 6
+Receiver: 0| 1 2 3 4 5 6
+----------------
+Receiver: received 3
+Drop frame
+Sender: [ 0 1 2 3| ] 4 5 6
+Receiver: 0| 1 2 3 4 5 6
+----------------
+Receiver: received 0
+Drop frame
+Sender: [ 0 1 2 3| ] 4 5 6
+Receiver: 0| 1 2 3 4 5 6
+----------------
+Receiver: received 1
+Send ack 1
+Sender: [ 0 1 2 3| ] 4 5 6
+Receiver: 0 1| 2 3 4 5 6
+----------------
+Sender: received ack 0
+Sender: [ 0 1 2 3| ] 4 5 6
+Receiver: 0 1| 2 3 4 5 6
+----------------
+Sender: timeout
+Resend packets 0..3
+Sender: [ 0 1 2 3| ] 4 5 6
+Receiver: 0 1| 2 3 4 5 6
+----------------
+Sender: timeout
+Resend packets 0..3
+Sender: [ 0 1 2 3| ] 4 5 6
+Receiver: 0 1| 2 3 4 5 6
+----------------
+Sender: received ack 1
+Sender: 0 [ 1 2 3| 4 ] 5 6
+Receiver: 0 1| 2 3 4 5 6
+----------------
+Sender: frame 4 sent
+Sender: 0 [ 1 2 3 4| ] 5 6
+Receiver: 0 1| 2 3 4 5 6
+----------------
+Sender: received ack 2
+Sender: 0 1 [ 2 3 4| 5 ] 6
+Receiver: 0 1| 2 3 4 5 6
+----------------
+Receiver: received 2
+Send ack 2
+Sender: 0 1 [ 2 3 4| 5 ] 6
+Receiver: 0 1 2| 3 4 5 6
+----------------
+Receiver: received 3
+Send ack 3
+Sender: 0 1 [ 2 3 4| 5 ] 6
+Receiver: 0 1 2 3| 4 5 6
+----------------
+Receiver: received 5
+Drop frame
+Sender: 0 1 [ 2 3 4| 5 ] 6
+Receiver: 0 1 2 3| 4 5 6
+----------------
+Sender: frame 5 sent
+Sender: 0 1 [ 2 3 4 5| ] 6
+Receiver: 0 1 2 3| 4 5 6
+----------------
+Sender: received ack 4
+Sender: 0 1 2 3 [ 4 5| 6 ]
+Receiver: 0 1 2 3| 4 5 6
+----------------
+Receiver: received 6
+Drop frame
+Sender: 0 1 2 3 [ 4 5| 6 ]
+Receiver: 0 1 2 3| 4 5 6
+----------------
+Receiver: received 4
+Send ack 4
+Sender: 0 1 2 3 [ 4 5| 6 ]
+Receiver: 0 1 2 3 4| 5 6
+----------------
+Receiver: received 6
+Drop frame
+Sender: 0 1 2 3 [ 4 5| 6 ]
+Receiver: 0 1 2 3 4| 5 6
+----------------
+Receiver: received 5
+Send ack 5
+Sender: 0 1 2 3 [ 4 5| 6 ]
+Receiver: 0 1 2 3 4 5| 6
+----------------
+Receiver: received 5
+Drop frame
+Sender: 0 1 2 3 [ 4 5| 6 ]
+Receiver: 0 1 2 3 4 5| 6
+----------------
+Sender: frame 6 sent
+Sender: 0 1 2 3 [ 4 5 6| ]
+Receiver: 0 1 2 3 4 5| 6
+----------------
+Sender: received ack 4
+Sender: 0 1 2 3 [ 4 5 6| ]
+Receiver: 0 1 2 3 4 5| 6
+----------------
+Sender: timeout
+Resend packets 4..6
+Sender: 0 1 2 3 [ 4 5 6| ]
+Receiver: 0 1 2 3 4 5| 6
+----------------
+Sender: received ack 5
+Sender: 0 1 2 3 4 [ 5 6| ]
+Receiver: 0 1 2 3 4 5| 6
+----------------
+Sender: received ack 5
+Sender: 0 1 2 3 4 [ 5 6| ]
+Receiver: 0 1 2 3 4 5| 6
+----------------
+Sender: timeout
+Resend packets 5..6
+Sender: 0 1 2 3 4 [ 5 6| ]
+Receiver: 0 1 2 3 4 5| 6
+----------------
+Sender: timeout
+Resend packets 5..6
+Sender: 0 1 2 3 4 [ 5 6| ]
+Receiver: 0 1 2 3 4 5| 6
+----------------
+Sender: received ack 7
+Sender: 0 1 2 3 4 5 6| [ ]
+Receiver: 0 1 2 3 4 5| 6
+----------------
+Receiver: received 6
+Send ack 6
+Sender: 0 1 2 3 4 5 6| [ ]
+Receiver: 0 1 2 3 4 5 6|
+----------------
+
+Process finished with exit code 0
