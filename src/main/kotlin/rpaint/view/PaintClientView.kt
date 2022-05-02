@@ -2,9 +2,12 @@ package rpaint.view
 
 import rpaint.control.PaintClientController
 import java.awt.BorderLayout
+import java.awt.Color
+import java.awt.Dimension
 import java.awt.Point
 import java.awt.event.*
 import javax.swing.JButton
+import javax.swing.JLabel
 import javax.swing.JPanel
 
 class PaintClientView(
@@ -36,9 +39,33 @@ class PaintClientView(
         })
     }
 
+    private fun colorActionListener(currentColor: JLabel, color: Color) =
+        ActionListener {
+            frame.drawArea.color = color
+            currentColor.background = color
+            controller.setColor(color)
+        }
+
     private fun buildControls() : JPanel {
         val controls = JPanel()
 
+        val currentColor = JLabel().apply {
+            background = frame.drawArea.color
+            isOpaque = true
+            preferredSize = Dimension(15, 15)
+        }
+        val redButton = JButton("red").apply {
+            addActionListener(colorActionListener(currentColor, Color.red))
+        }
+        val blackButton = JButton("black").apply {
+            addActionListener(colorActionListener(currentColor, Color.black))
+        }
+        val blueButton = JButton("blue").apply {
+            addActionListener(colorActionListener(currentColor, Color.blue))
+        }
+        val greenButton = JButton("green").apply {
+            addActionListener(colorActionListener(currentColor, Color.green))
+        }
         val clearButton = JButton("clear").apply {
             addActionListener {
                 frame.drawArea.clear()
@@ -46,6 +73,11 @@ class PaintClientView(
             }
         }
 
+        controls.add(currentColor)
+        controls.add(blackButton)
+        controls.add(redButton)
+        controls.add(greenButton)
+        controls.add(blueButton)
         controls.add(clearButton)
         return controls
     }
