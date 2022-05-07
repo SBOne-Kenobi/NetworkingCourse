@@ -25,3 +25,31 @@ compileKotlin {
 compileTestKotlin {
     kotlinOptions.jvmTarget = '11'
 }
+
+task paintServerJar(type: Jar) {
+    dependsOn compileKotlin
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': 'rpaint.ServerKt'
+    }
+    from {
+        sourceSets.main.output + configurations.compileClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    archiveFileName = "paint-server.jar"
+}
+
+task paintClientJar(type: Jar) {
+    dependsOn compileKotlin
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': 'rpaint.ClientKt'
+    }
+    from {
+        sourceSets.main.output + configurations.compileClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    archiveFileName = "paint-client.jar"
+}
