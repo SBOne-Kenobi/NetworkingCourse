@@ -26,30 +26,30 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = '11'
 }
 
-task paintServerJar(type: Jar) {
+task speedTestServerJar(type: Jar) {
     dependsOn compileKotlin
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes 'Main-Class': 'rpaint.ServerKt'
+    this.manifest {
+        attributes 'Main-Class': 'speedtest.ServerKt'
     }
     from {
         sourceSets.main.output + configurations.compileClasspath.collect {
             it.isDirectory() ? it : zipTree(it)
         }
     }
-    archiveFileName = "paint-server.jar"
+    archiveFileName = "speed-test-server.jar"
 }
 
-task paintClientJar(type: Jar) {
+task speedTestClientJar(type: Jar) {
     dependsOn compileKotlin
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes 'Main-Class': 'rpaint.ClientKt'
+    this.manifest {
+        attributes 'Main-Class': 'speedtest.ClientKt'
     }
     from {
         sourceSets.main.output + configurations.compileClasspath.collect {
             it.isDirectory() ? it : zipTree(it)
         }
     }
-    archiveFileName = "paint-client.jar"
+    archiveFileName = "speed-test-client.jar"
 }
