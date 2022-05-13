@@ -38,10 +38,10 @@ object RIP {
         }
     }
 
-    const val VERSION = 2
-    const val AF_INET = 2
-    const val ROUTE_TAG = 0
-    val SUBNET_MASK = ByteArray(4) { 0xFF.toByte() }
+    private const val VERSION = 2
+    private const val AF_INET = 2
+    private const val ROUTE_TAG = 0
+    private val SUBNET_MASK = ByteArray(4) { 0xFF.toByte() }
 
     fun buildPackage(data: RIPData): ByteArray {
         val output = ByteArrayOutputStream(24)

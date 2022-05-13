@@ -9,6 +9,6 @@ object Settings {
     const val delayCommunication: Long = 10
 
     const val updateTimer: Long = 10
-//    const val invalidTimer: Long = 60
-//    const val flushTimer: Long = invalidTimer + 2 * updateTimer
+
+    const val collectHistory: Boolean = true
 }

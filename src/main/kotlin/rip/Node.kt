@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.concurrent.thread
 
 typealias Cost = Int
-const val ZERO: Cost = 0
 
 data class Connection(val to: Node, val cost: Cost, val nextHop: Node = to)
 
@@ -72,7 +71,12 @@ class Node(
                 oldConnection
             }
         }
-        if (changed) channelSend.trySend(newConnection!!)
+        if (changed) {
+            channelSend.trySend(newConnection!!)
+            if (Settings.collectHistory) {
+                StateHistory.addNodeState(this, computed)
+            }
+        }
     }
 
     private fun initBroadcaster() {
@@ -116,14 +120,6 @@ class Node(
     fun addNeighbour(connection: Connection) {
         neighbours[connection.to] = connection.cost
         available[connection.to] = connection
-    }
-
-    fun updateNeighbour(connection: Connection) {
-        neighbours.compute(connection.to) { _, oldCost ->
-            require(oldCost == null || oldCost >= connection.cost)
-            connection.cost
-        }
-        update(connection.to, Connection(connection.to, ZERO))
     }
 
     fun start() {

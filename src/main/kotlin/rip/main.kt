@@ -31,7 +31,7 @@ fun initNodes(path: URL): List<Node> {
 fun String.center(width: Int) =
     "%${length + (width - length) / 2}s".format(this)
 
-fun getNodeState(titleFormat: String, node: Node): String {
+fun getNodeState(titleFormat: String, node: Node, state: Map<Node, Connection>): String {
     val width = 16
     val metricWidth = 13
     val format = "| %-${width}s | %-${width}s | %-${width}s | %-${metricWidth}s |"
@@ -43,7 +43,7 @@ fun getNodeState(titleFormat: String, node: Node): String {
             "[Next Hop]".center(width),
             "[Metric]".center(metricWidth)
         ))
-        node.computed.forEach { (_, connection) ->
+        state.forEach { (_, connection) ->
             appendLine(format.format(
                 node.ip.hostAddress.center(width),
                 connection.to.ip.hostAddress.center(width),
@@ -54,10 +54,23 @@ fun getNodeState(titleFormat: String, node: Node): String {
     }
 }
 
+fun getNodeStateHistory(node: Node): String {
+    val separator = "${"-".repeat(74)}\n"
+    var i = 0
+    return StateHistory.getHistory(node).joinToString(separator) { state ->
+        i += 1
+        getNodeState("Simulation step $i of router %s", node, state)
+    }
+}
+
 fun printState(nodes: List<Node>) {
-    val separator = "${"_".repeat(74)}\n"
+    val len = if (Settings.collectHistory) 85 else 74
+    val separator = "${"_".repeat(len)}\n"
     println(nodes.joinToString(separator, separator, separator) { node ->
-        getNodeState("Final state of router %s table:", node)
+        if (Settings.collectHistory)
+            getNodeStateHistory(node)
+        else
+            getNodeState("Final state of router %s table:", node, node.computed)
     })
 }
 
@@ -66,8 +79,15 @@ fun main(args: Array<String>) {
         ?: ClassLoader.getSystemResource("config.json")
     val nodes = initNodes(configURL)
 
-    nodes.forEach { it.start() }
+    StateHistory.start()
+    nodes.forEach {
+        if (Settings.collectHistory) {
+            StateHistory.addNodeState(it, it.computed)
+        }
+        it.start()
+    }
     Thread.sleep(Settings.timeoutToFit)
     nodes.forEach { it.stop() }
+    StateHistory.stop()
     printState(nodes)
 }
