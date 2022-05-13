@@ -76,7 +76,7 @@ fun printState(nodes: List<Node>) {
 
 fun main(args: Array<String>) {
     val configURL = args.getOrNull(0)?.let { Path.of(it).toUri().toURL() }
-        ?: ClassLoader.getSystemResource("config.json")
+        ?: ClassLoader.getSystemResource("rip-config.json")
     val nodes = initNodes(configURL)
 
     StateHistory.start()
